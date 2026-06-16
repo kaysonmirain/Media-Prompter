@@ -1,25 +1,26 @@
 # Media Prompter
 
-Drop in an image or video and get a prompt back — captions, what objects are in the frame, scene type, mood, and a handful of semantic tags. Handy when you need a solid text description of visual media without writing it yourself.
-
-**Kayson Mirain**
+Upload an image or video and get a descriptive prompt back — captions, detected objects, scene type, mood, and semantic tags.
 
 ## Setup
 
-You need Python 3.9 or newer. From the project folder:
+Python 3.9+. From the project folder:
 
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
 
-That creates a venv, installs dependencies, and starts the server at http://localhost:6666. The browser opens on its own. First launch takes a bit while models download.
+Starts at http://localhost:6666. First run installs deps into `.venv` and pulls model weights.
 
-## Models
+## How it's built
 
-- **BLIP** — captions and the main prompt text
-- **YOLOv8x** — object detection
-- **CLIP ViT-L/14** — tags, mood, scene semantics
-- **EfficientNet-B7** — scene classification
+The backend is FastAPI. On startup, `backend/main.py` loads a `VisionAnalyzer` that runs four models in parallel — YOLOv8x for object detection, BLIP for captions, CLIP ViT-L/14 for tags and mood, and EfficientNet-B7 for scene labels. Each model has its own file under `backend/models/`.
 
-Videos are sampled frame-by-frame (up to 16 frames) and summarized into a timeline.
+When you upload a file, the API queues analysis and streams progress over WebSocket. The analyzer builds the final prompt from caption text, detections, scene scores, and CLIP outputs.
+
+Videos go through `video_processor.py`, which samples up to 16 frames and runs the same pipeline on each one, then rolls it into a timeline summary.
+
+The frontend is vanilla HTML/CSS/JS in `frontend/` — drag-and-drop upload, live progress, and tabs for detections, scene breakdown, mood, tags, and raw JSON. No React or build step.
+
+`start.sh` sets up the venv, installs from `requirements.txt`, and launches uvicorn. The server also serves the static frontend files.
