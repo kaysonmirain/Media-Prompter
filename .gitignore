@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .DS_Store
 uploads/
+backend/uploads/
 yolov8x.pt
 test_*.jpg
 *.pt
