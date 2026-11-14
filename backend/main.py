@@ -160,12 +160,12 @@ async def health_check():
     device = "cuda" if torch.cuda.is_available() else (
         "mps" if torch.backends.mps.is_available() else "cpu"
     )
-    return {
-        "status": "healthy",
+    return JSONResponse({
+        "status": "healthy" if _analyzer is not None else "unavailable",
         "models_loaded": _analyzer is not None,
         "device": device,
         "pytorch_version": torch.__version__
-    }
+    }, status_code=200 if _analyzer is not None else 503)
 
 
 # Removed preload endpoints to prevent macOS PyTorch ThreadPool deadlocks
@@ -189,9 +189,8 @@ if __name__ == "__main__":
     print(f"  API Docs: http://localhost:{port}/docs")
     print("=" * 60)
 
-    port = int(os.environ.get("PORT", "8001"))
     uvicorn.run(
-        "main:app",
+        app,
         host="0.0.0.0",
         port=port,
         reload=False,
