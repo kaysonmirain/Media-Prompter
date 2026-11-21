@@ -1,29 +1,33 @@
-"""End-to-end API test — uploads test_image.jpg and prints analysis results."""
-import json
+"""End-to-end API test using a JPEG of a dog."""
+import argparse
+import os
 import sys
 from pathlib import Path
 
 import requests
 
-API_URL = "http://localhost:8001"
 TEST_IMAGE = Path(__file__).parent / "test_image.jpg"
 
 
 def main():
-    if not TEST_IMAGE.exists():
-        print(f"ERROR: Test image not found: {TEST_IMAGE}")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("image", type=Path, nargs="?", default=TEST_IMAGE)
+    parser.add_argument("--url", default=f"http://localhost:{os.environ.get('PORT', '8001')}")
+    args = parser.parse_args()
+    if not args.image.is_file():
+        parser.error(f"Provide the path to a JPEG of a dog. File not found: {args.image}")
+    api_url = args.url.rstrip("/")
 
     print("1. Health check...")
-    health = requests.get(f"{API_URL}/health", timeout=10)
+    health = requests.get(f"{api_url}/health", timeout=10)
     health.raise_for_status()
     print(f"   {health.json()}")
 
     print("\n2. Analyzing image via POST /analyze...")
-    with open(TEST_IMAGE, "rb") as f:
+    with args.image.open("rb") as f:
         response = requests.post(
-            f"{API_URL}/analyze",
-            files={"file": ("test_image.jpg", f, "image/jpeg")},
+            f"{api_url}/analyze",
+            files={"file": (args.image.name, f, "image/jpeg")},
             timeout=600,
         )
 
@@ -65,7 +69,7 @@ def main():
 
     labels = {d["label"].lower() for d in dets}
     if "dog" not in labels:
-        print("\nWarning: expected 'dog' in detections for test_image.jpg")
+        print(f"\nExpected a dog detection for {args.image.name}.")
         sys.exit(1)
 
     print("\nDog detected — output looks correct.")

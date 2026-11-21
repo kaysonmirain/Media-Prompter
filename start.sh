@@ -30,7 +30,7 @@ echo "Installing dependencies (this may take a while first time)..."
 
 echo "Dependencies installed"
 echo ""
-PORT="${PORT:-6666}"
+export PORT="${PORT:-8001}"
 echo "Starting Media Prompter at http://localhost:${PORT}"
 echo "Opening browser..."
 echo ""
@@ -42,6 +42,5 @@ echo ""
   open "http://localhost:${PORT}"
 ) &
 
-export PORT="${PORT:-6666}"
 cd backend
 ../.venv/bin/python3 main.py

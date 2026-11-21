@@ -11,7 +11,13 @@ chmod +x start.sh
 ./start.sh
 ```
 
-Starts at http://localhost:6666. The first run installs dependencies into `.venv` and downloads several model weights. Wait for the terminal to report that the models loaded. The `/health` endpoint returns HTTP 503 if initialization fails, and the terminal shows the startup error.
+Starts at http://localhost:8001. The first run installs dependencies into `.venv` and downloads several model weights. Wait for the terminal to report that the models loaded. The `/health` endpoint returns HTTP 503 if initialization fails, and the terminal shows the startup error.
+
+With the server running, use a JPEG of a dog to check the upload and object detection.
+
+```bash
+.venv/bin/python test_api.py /path/to/dog.jpg
+```
 
 ## How it's built
 
