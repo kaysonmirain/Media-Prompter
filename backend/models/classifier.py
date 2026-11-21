@@ -65,7 +65,8 @@ class CLIPAnalyzer:
         print("[CLIP] Loading OpenCLIP ViT-L/14 (openai)...")
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(
             "ViT-L-14",
-            pretrained="openai"
+            pretrained="openai",
+            force_quick_gelu=True,
         )
         self.tokenizer = open_clip.get_tokenizer("ViT-L-14")
         self.model = self.model.to(self.device)
